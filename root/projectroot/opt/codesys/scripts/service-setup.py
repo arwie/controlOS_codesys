@@ -1,3 +1,5 @@
+#!/usr/bin/python -Bu
+
 # Copyright (c) 2023 Artur Wiebe <artur@4wiebe.de>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -15,47 +17,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import asyncio
-import mmap
-import os
-from ctypes import *
-import posix_ipc
+from __future__ import annotations
+from pathlib import Path
 from shared.codesys import parse_struct
 
-
-cmd = parse_struct('Cmd')()
-fbk = parse_struct('Fbk')()
+from shared.setup import setup
 
 
-def sync():
-	global _sync_event
-	return _sync_event.wait()
+codesys_setup = parse_struct('Setup')()
 
+for field in codesys_setup._fields_:
+	setattr(codesys_setup, field.name, eval(field.comment))
 
-async def _sync_loop(cycle_time):
-	global _sync_event
-	_sync_event = asyncio.Event()
-
-	cmd_addr, cmd_size = addressof(cmd), sizeof(cmd)
-	fbk_addr, fbk_size = addressof(fbk), sizeof(fbk)
-
-	sem = posix_ipc.Semaphore('/codesys')
-	shm = posix_ipc.SharedMemory('/codesys')
-	mapfile = mmap.mmap(shm.fd, shm.size)
-	shm_cmd_addr = addressof((c_char*shm.size).from_buffer(mapfile))
-	shm_fbk_addr = shm_cmd_addr + cmd_size
-	os.close(shm.fd)
-
-	while (True):
-		await asyncio.sleep(cycle_time)
-
-		with sem:
-			memmove(shm_cmd_addr, cmd_addr, cmd_size)
-			memmove(fbk_addr, shm_fbk_addr, fbk_size)
-
-		_sync_event.set()
-		_sync_event = asyncio.Event()
-
-
-def start():
-	_sync_loop.task = asyncio.create_task(_sync_loop(0.008))
+Path('/run/codesys/setup').write_bytes(bytes(codesys_setup))
