@@ -3,6 +3,8 @@ Before=app.service
 
 
 [Service]
+SyslogIdentifier=codesys
+
 RuntimeDirectory=codesys
 WorkingDirectory=/var/codesys
 
