@@ -24,7 +24,7 @@ from shared.codesys import parse_struct
 from shared.setup import setup
 
 
-codesys_setup = parse_struct('Setup')()
+codesys_setup = parse_struct('AppSetup')()
 
 for field in codesys_setup._fields_:
 	setattr(codesys_setup, field.name, eval(field.comment))

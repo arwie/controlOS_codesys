@@ -25,25 +25,23 @@ from shared.codesys import parse_struct
 from . import app
 
 
-cmd = parse_struct('Cmd')()
-fbk = parse_struct('Fbk')()
+cmd = parse_struct('AppCmd')()
+fbk = parse_struct('AppFbk')()
 
 
 sync_event = app.Event()
-
-def sync():
-	return sync_event.wait()
+sync = sync_event.wait
 
 
 @wraps(app.poll)
 async def poll(condition, **kwargs):
-	await sync_event.wait()	#cmd -> codesys
-	await sync_event.wait()	#codesys -> fbk 
-	return await app.poll(condition, period=sync_event.wait, **kwargs)
+	await sync() #cmd -> codesys
+	await sync() #codesys -> fbk
+	return await app.poll(condition, period=sync, **kwargs)
 
 
 @app.context
-async def link(cycle_time_ms:int):
+async def exec(period:float):
 	sem = posix_ipc.Semaphore('/codesys')
 	shm = posix_ipc.SharedMemory('/codesys')
 	with mmap.mmap(shm.fd, shm.size) as mapfile:
@@ -54,13 +52,12 @@ async def link(cycle_time_ms:int):
 		os.close(shm.fd)
 
 		async def link_loop():
-			cycle_time = cycle_time_ms / 1000
 			while True:
-				await asyncio.sleep(cycle_time)
 				with sem:
 					memmove(shm_cmd_addr, cmd_addr, cmd_size)
 					memmove(fbk_addr, shm_fbk_addr, fbk_size)
 				sync_event.trigger()
+				await asyncio.sleep(period)
 
 		async with app.task_group(link_loop()):
 			try:
