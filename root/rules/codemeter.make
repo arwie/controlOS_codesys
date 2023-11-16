@@ -15,14 +15,17 @@ CODEMETER_VERSION		:= 7.60.5615.502
 ifdef PTXCONF_ARCH_X86_64
 CODEMETER_SOURCE		:= $(SRCDIR)/codemeter-lite_$(CODEMETER_VERSION)_amd64.deb
 CODEMETER_MD5			:= 2a5a777ce8f1caccd25acbaa9f30dd8c
+CODEMETER_LIB			:= x86_64-linux-gnu
 endif
 ifdef PTXCONF_ARCH_ARM
 CODEMETER_SOURCE		:= $(SRCDIR)/codemeter-lite_$(CODEMETER_VERSION)_armhf.deb
 CODEMETER_MD5			:= 22459750fd6a02e12ccc50e5dd5ac966
+CODEMETER_LIB			:= arm-linux-gnueabihf
 endif
 ifdef PTXCONF_ARCH_ARM64
 CODEMETER_SOURCE		:= $(SRCDIR)/codemeter-lite_$(CODEMETER_VERSION)_arm64.deb
 CODEMETER_MD5			:= a88b9a1b44b6af74a2b722aad6ff5cea
+CODEMETER_LIB			:= aarch64-linux-gnu
 endif
 CODEMETER			:= codemeter-$(CODEMETER_VERSION)
 CODEMETER_DIR			:= $(BUILDDIR)/$(CODEMETER)
@@ -82,7 +85,7 @@ $(STATEDIR)/codemeter.targetinstall:
 		/usr/bin)
 
 	@$(call install_glob, codemeter, 0, 0, \
-		$(CODEMETER_DIR)/usr/lib/x86_64-linux-gnu, \
+		$(CODEMETER_DIR)/usr/lib/$(CODEMETER_LIB), \
 		/usr/lib, \
 		*.so, */jni/*)
 
