@@ -1,11 +1,16 @@
 [Unit]
+Wants=codesys-log.service
+After=codesys-log.service
+
 Wants=codemeter.service
 After=codemeter.service
+
 Before=app.service
 
 
 [Service]
-SyslogIdentifier=codesys
+StandardOutput=tty
+TTYPath=/run/codesys-log/tty
 
 RuntimeDirectory=codesys
 WorkingDirectory=/var/codesys
