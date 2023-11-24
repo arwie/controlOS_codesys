@@ -1,0 +1,4 @@
+*filter
+-A INPUT -i lo -p tcp --dport 11749 -j ACCEPT
+-A INPUT       -p tcp --dport 11749 -j DROP
+COMMIT
