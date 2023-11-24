@@ -75,7 +75,7 @@ $(STATEDIR)/codesys.targetinstall:
 
 	@$(call install_tree, codesys, 0, 0, $(CODESYS_DIR)/opt, /opt)
 	@$(call install_alternative, codesys, 0, 0, 0755, /opt/codesys/scripts/service-setup.py)
-	@$(call install_alternative, codesys, 0, 0, 0755, /opt/codesys/scripts/log-pty.py)
+	@$(call install_alternative, codesys, 0, 0, 0755, /opt/codesys/scripts/log-journal.py)
 
 	@$(call install_alternative, codesys, 0, 0, 0644, /etc/CODESYSControl.cfg)
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/tmpfiles.d/codesys.conf)
@@ -86,7 +86,6 @@ $(STATEDIR)/codesys.targetinstall:
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/systemd/system/codesys.service)
 	@$(call install_link,        codesys, ../codesys.service, /usr/lib/systemd/system/multi-user.target.wants/codesys.service)
 
-	@$(call install_alternative, codesys, 0, 0, 0644, /etc/iptables/rules.v4.d/codesys.v4)
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/systemd/system/codesys-proxy.service)
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/systemd/system/codesys-proxy.socket)
 	@$(call install_link,        codesys, ../codesys-proxy.socket, /usr/lib/systemd/system/debug.target.wants/codesys-proxy.socket)
