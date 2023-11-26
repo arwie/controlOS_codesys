@@ -56,22 +56,25 @@ $(STATEDIR)/codesys.targetinstall:
 	@$(call install_fixup,codesys,AUTHOR,"Artur Wiebe <artur@4wiebe.de>")
 	@$(call install_fixup,codesys,DESCRIPTION,missing)
 
-	@$(call install_tree, codesys, 0, 0, -, /opt)
-	@$(call install_alternative, codesys, 0, 0, 0755, /opt/codesys/scripts/service-setup.py)
-	@$(call install_alternative, codesys, 0, 0, 0755, /opt/codesys/scripts/log-journal.py)
+	@$(call install_copy, codesys, 0, 0, 0644, -, /etc/3S.dat)
+	@$(call install_tree, codesys, 0, 0, -, /opt/codesys)
+	@$(call install_tree, codesys, 0, 0, -, /var/opt/codesys)
 
 	@$(call install_alternative, codesys, 0, 0, 0644, /etc/CODESYSControl.cfg)
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/tmpfiles.d/codesys.conf)
 
-	@$(call install_alternative_tree, codesys, 0, 0,  /usr/share/codesys)
-
+	@$(call install_alternative, codesys, 0, 0, 0755, /opt/codesys/scripts/log-journal.py)
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/systemd/system/codesys-log.service)
-	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/systemd/system/codesys.service)
-	@$(call install_link,        codesys, ../codesys.service, /usr/lib/systemd/system/multi-user.target.wants/codesys.service)
 
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/systemd/system/codesys-proxy.service)
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/systemd/system/codesys-proxy.socket)
 	@$(call install_link,        codesys, ../codesys-proxy.socket, /usr/lib/systemd/system/debug.target.wants/codesys-proxy.socket)
+
+	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/systemd/system/codesys.service)
+	@$(call install_link,        codesys, ../codesys.service, /usr/lib/systemd/system/multi-user.target.wants/codesys.service)
+
+	@$(call install_alternative, codesys, 0, 0, 0755, /opt/codesys/scripts/service-setup.py)
+	@$(call install_alternative_tree, codesys, 0, 0,  /usr/share/codesys)
 
 	@$(call install_finish,codesys)
 	@$(call touch)

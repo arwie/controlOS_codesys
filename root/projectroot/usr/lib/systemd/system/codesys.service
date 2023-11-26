@@ -13,7 +13,7 @@ StandardOutput=tty
 TTYPath=/run/codesys-log/tty
 
 RuntimeDirectory=codesys
-WorkingDirectory=/var/codesys
+WorkingDirectory=/var/opt/codesys
 
 ExecStartPre=/opt/codesys/scripts/service-setup.py
 ExecStart=/opt/codesys/bin/codesyscontrol.bin --debug --printlostcycles /etc/CODESYSControl.cfg
