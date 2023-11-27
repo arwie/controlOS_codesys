@@ -9,13 +9,12 @@ Before=app.service
 
 
 [Service]
+WorkingDirectory=/var/opt/codesys
+RuntimeDirectory=codesys
+
 StandardOutput=tty
 TTYPath=/run/codesys-log/tty
 
-RuntimeDirectory=codesys
-WorkingDirectory=/var/opt/codesys
-
-ExecStartPre=/opt/codesys/scripts/service-setup.py
-ExecStart=/opt/codesys/bin/codesyscontrol.bin --debug --printlostcycles /etc/CODESYSControl.cfg
-
 CPUAffinity=1
+
+ExecStart=/opt/codesys/bin/codesyscontrol.bin /etc/CODESYSControl.cfg

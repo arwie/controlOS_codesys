@@ -64,3 +64,7 @@ def parse_struct(name:str) -> type[ctypes.Structure]:
 		(ctypes.Structure, ),
 		{'_fields_': [Field(f[0], ctype(f[1]), f[2]) for f in re.findall(r'^\s*(\w+)\s*:\s*(.+)\s*;\s*(?://\s*(.*)\s*)?$', file_text, re.MULTILINE)]},
 	)
+
+
+def runstop_switch(run:bool):
+	Path('/var/opt/codesysextension/runstop.switch').write_bytes(b'RUN' if run else b'STOP')
