@@ -18,14 +18,22 @@
 
 import os
 import re
-from systemd import journal, daemon
+from systemd import daemon
+from shared import log
 
 
 master, slave = os.openpty()
 os.symlink(os.ttyname(slave), '/run/codesys-log/tty')
 daemon.notify('READY=1')
 
-pattern = re.compile(r'.*: Cmp=(.*), Class=(.*), Error=(.*), Info=(.*), pszInfo=\s*(.*)\s*')
+
+def send(priority:int, message:str, *args):
+	log.journal.sendv(
+		'SYSLOG_IDENTIFIER=codesys',
+		f'PRIORITY={priority}',
+		f'MESSAGE={message}',
+		*args
+	)
 
 def prio(prio_class):
 	match prio_class:
@@ -35,14 +43,23 @@ def prio(prio_class):
 		case '8': return 2 #Critical
 		case _:   return 7 #Debug
 
-with os.fdopen(master) as input:
-	while True:
-		if line := pattern.search(input.readline()):
-			journal.sendv(
-				f'CMP={line.group(1)}',
-				f'PRIORITY={prio(line.group(2))}',
-				f'ERROR={line.group(3)}',
-				f'INFO={line.group(4)}',
-				f'MESSAGE={line.group(5)}',
-				'SYSLOG_IDENTIFIER=codesys'
-			)
+
+pattern = re.compile(r'Cmp=(.*), Class=(.*), Error=(.*), Info=(.*), pszInfo=(.*)')
+
+with os.fdopen(master, 'rb') as input:
+	for line in input:
+		try:
+			line = line.decode().strip()
+			if match := pattern.search(line):
+				send(
+					prio(match.group(2)),
+					match.group(5).strip(),
+					f'CMP={match.group(1)}',
+					f'ERROR={match.group(3)}',
+					f'INFO={match.group(4)}',
+				)
+			else:
+				if line and not line.startswith('_/'):
+					send(6, line)
+		except Exception:
+			log.exception(line)

@@ -63,7 +63,7 @@ $(STATEDIR)/codesys.targetinstall:
 	@$(call install_alternative, codesys, 0, 0, 0644, /etc/CODESYSControl.cfg)
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/tmpfiles.d/codesys.conf)
 
-	@$(call install_alternative, codesys, 0, 0, 0755, /opt/codesys/scripts/log-journal.py)
+	@$(call install_alternative, codesys, 0, 0, 0755, /opt/codesys/bin/log-journal.py)
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/systemd/system/codesys-log.service)
 
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/systemd/system/codesys-proxy.service)
