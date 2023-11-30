@@ -56,9 +56,10 @@ $(STATEDIR)/codesys.targetinstall:
 	@$(call install_fixup,codesys,AUTHOR,"Artur Wiebe <artur@4wiebe.de>")
 	@$(call install_fixup,codesys,DESCRIPTION,missing)
 
-	@$(call install_copy, codesys, 0, 0, 0644, -, /etc/3S.dat)
 	@$(call install_tree, codesys, 0, 0, -, /opt/codesys)
+
 	@$(call install_tree, codesys, 0, 0, -, /var/opt/codesys)
+	@$(call install_copy, codesys, 0, 0, 0755, /var/opt/codesys/PlcLogic)
 
 	@$(call install_alternative, codesys, 0, 0, 0644, /etc/CODESYSControl.cfg)
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/tmpfiles.d/codesys.conf)
@@ -73,7 +74,11 @@ $(STATEDIR)/codesys.targetinstall:
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/systemd/system/codesys.service)
 	@$(call install_link,        codesys, ../codesys.service, /usr/lib/systemd/system/multi-user.target.wants/codesys.service)
 
-	@$(call install_alternative_tree, codesys, 0, 0,  /usr/share/codesys)
+ifdef PTXCONF_CODESYS_DEPLOY
+	@$(call install_alternative_tree, codesys, 0, 0, /opt/codesys/PlcLogic)
+else
+	@$(call install_link, codesys, /var/opt/codesys/PlcLogic, /opt/codesys/PlcLogic)
+endif
 
 	@$(call install_finish,codesys)
 	@$(call touch)

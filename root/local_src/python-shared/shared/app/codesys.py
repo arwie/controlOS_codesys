@@ -50,7 +50,7 @@ async def exec(period:float):
 	cfg_path.write_bytes(bytes(cfg))
 	runstop_switch(True)
 	try:
-		if not await app.poll(lambda: Path('/dev/shm/codesys').exists(), timeout=5):
+		if not await app.poll(lambda: Path('/dev/shm/codesys').exists(), timeout=10):
 			raise Exception('codesys application not started')
 		sem = posix_ipc.Semaphore('/codesys')
 		shm = posix_ipc.SharedMemory('/codesys')
@@ -79,7 +79,7 @@ async def exec(period:float):
 			sem.close()
 	finally:
 		runstop_switch(False)
-		await app.poll(lambda: not cfg_path.exists(), timeout=3)
+		await app.poll(lambda: not cfg_path.exists(), timeout=5)
 
 
 
