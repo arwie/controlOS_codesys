@@ -17,4 +17,7 @@ TTYPath=/run/codesys-log/tty
 
 CPUAffinity=1
 
+ExecStartPre=-/opt/codesys/scripts/select-application
+
+Type=exec
 ExecStart=/opt/codesys/bin/codesyscontrol.bin /etc/CODESYSControl.cfg

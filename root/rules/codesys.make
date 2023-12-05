@@ -76,6 +76,7 @@ $(STATEDIR)/codesys.targetinstall:
 
 ifdef PTXCONF_CODESYS_DEPLOY
 	@$(call install_alternative_tree, codesys, 0, 0, /opt/codesys/PlcLogic)
+	@$(call install_alternative, codesys, 0, 0, 0755, /opt/codesys/scripts/select-application)
 else
 	@$(call install_link, codesys, /var/opt/codesys/PlcLogic, /opt/codesys/PlcLogic)
 endif
