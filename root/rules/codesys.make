@@ -56,6 +56,7 @@ $(STATEDIR)/codesys.targetinstall:
 	@$(call install_fixup,codesys,AUTHOR,"Artur Wiebe <artur@4wiebe.de>")
 	@$(call install_fixup,codesys,DESCRIPTION,missing)
 
+	@$(call install_copy, codesys, 0, 0, 0644, -, /etc/3S.dat)
 	@$(call install_tree, codesys, 0, 0, -, /opt/codesys)
 
 	@$(call install_tree, codesys, 0, 0, -, /var/opt/codesys)
