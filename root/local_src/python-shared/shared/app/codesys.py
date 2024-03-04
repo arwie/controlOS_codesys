@@ -42,8 +42,6 @@ async def poll(condition, **kwargs):
 
 
 
-runstop_switch(False)
-
 @app.context
 async def exec(period:float):
 	cfg_path = Path('/run/codesys/cfg')
