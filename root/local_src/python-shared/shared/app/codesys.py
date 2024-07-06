@@ -17,10 +17,10 @@
 
 import asyncio
 import mmap
-from ctypes import addressof, sizeof, memmove, c_char
+from ctypes import addressof, sizeof, memmove, c_char, c_uint8, c_uint16, c_uint32
 import posix_ipc
 from pathlib import Path
-from functools import wraps
+from functools import partial
 from shared.codesys import parse_struct, runstop_switch
 from . import app
 
@@ -30,15 +30,14 @@ cmd = parse_struct('AppCmd')()
 fbk = parse_struct('AppFbk')()
 
 
-sync_event = app.Event()
-sync = sync_event.wait
+_sync_trigger = app.Trigger()
 
 
-@wraps(app.poll)
-async def poll(condition, **kwargs):
-	await sync() #cmd -> codesys
-	await sync() #codesys -> fbk
-	return await app.poll(condition, period=sync, **kwargs)
+poll = partial(app.poll, period=_sync_trigger)
+
+async def sync():
+	await _sync_trigger.wait() #cmd -> codesys
+	await _sync_trigger.wait() #codesys -> fbk
 
 
 
@@ -59,15 +58,15 @@ async def exec(period:float):
 				shm_cmd_addr = addressof((c_char*shm.size).from_buffer(mapfile))
 				shm_fbk_addr = shm_cmd_addr + cmd_size
 
-				async def link_loop():
+				async def sync_loop():
 					while True:
 						with sem:
 							memmove(shm_cmd_addr, cmd_addr, cmd_size)
 							memmove(fbk_addr, shm_fbk_addr, fbk_size)
-						sync_event.trigger()
+						_sync_trigger()
 						await asyncio.sleep(period)
 
-				async with app.task_group(link_loop()):
+				async with app.task_group(sync_loop):
 					try:
 						yield
 					finally:
@@ -81,17 +80,38 @@ async def exec(period:float):
 
 
 
-async def co_sdo_write(device, index, sub_index, data_length, data):
-	cmd.co.func = 1
-	cmd.co.device = device
-	cmd.co.index = index
-	cmd.co.subIndex = sub_index
-	cmd.co.dataLength = data_length
-	cmd.co.data = data
-	cmd.co.exec = True
-	try:
-		await poll(lambda: fbk.co.done)
-	finally:
-		cmd.co.exec = False
-		await sync()
-		cmd.co.func = 0
+
+class EthercatDevice:
+
+	_co_lock = asyncio.Lock()
+
+
+	def __init__(self, slave:int, master:int=1):
+		self.slave  = slave
+		self.master = master
+
+
+	async def sdo_write(self, addr:tuple[int, int], data: c_uint8 | c_uint16 | c_uint32):
+		async with self._co_lock:
+			cmd.co.dataLength = sizeof(data)
+			cmd.co.data = c_uint32(data.value)
+			await self._sdo_exec(2, addr)
+
+
+	async def _sdo_exec(self, func:int, addr:tuple[int, int]):
+		cmd.co.func = func
+		cmd.co.master = self.master
+		cmd.co.slave = self.slave
+		cmd.co.index, cmd.co.subIndex = addr
+		try:
+			if not await poll(lambda: fbk.co.done, abort=lambda: fbk.co.error):
+				raise Exception(f'SDO access error: {self.slave} > {hex(addr[0])}:{addr[1]}')
+		finally:
+			cmd.co.func = 0
+			await sync()
+
+
+
+class CanopenDevice(EthercatDevice):
+	async def _sdo_exec(self, func, addr):
+		return await super()._sdo_exec(-func, addr)
