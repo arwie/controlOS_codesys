@@ -11,18 +11,18 @@
 #
 PACKAGES-$(PTXCONF_CODESYS) += codesys
 
-CODESYS_VERSION		:= 4.11.0.0
+CODESYS_VERSION		:= 4.12.0.0
 ifdef PTXCONF_ARCH_X86_64
 CODESYS_SOURCE		:= $(SRCDIR)/codesyscontrol_linux_$(CODESYS_VERSION)_amd64.deb
-CODESYS_MD5		:= 226e37324c72e5b6b254b47aa7d90863
+CODESYS_MD5		:= 31a9bf8c6ad9c27cf3ef82b1e5dd2576
 endif
 ifdef PTXCONF_ARCH_ARM
 CODESYS_SOURCE		:= $(SRCDIR)/codesyscontrol_linuxarm_$(CODESYS_VERSION)_armhf.deb
-CODESYS_MD5		:= 34ad8e58df44d17fe87c1006c40e1713
+CODESYS_MD5		:= 9316e852ee60e0beef95ffde730d63e1
 endif
 ifdef PTXCONF_ARCH_ARM64
 CODESYS_SOURCE		:= $(SRCDIR)/codesyscontrol_linuxarm64_$(CODESYS_VERSION)_arm64.deb
-CODESYS_MD5		:= 36a2c5f5d06ede848342d129946ef422
+CODESYS_MD5		:= 01f6b9e953b894c5f9afd352bc74b628
 endif
 CODESYS			:= codesys-$(CODESYS_VERSION)
 CODESYS_LICENSE		:= unknown
@@ -56,13 +56,13 @@ $(STATEDIR)/codesys.targetinstall:
 	@$(call install_fixup,codesys,AUTHOR,"Artur Wiebe <artur@4wiebe.de>")
 	@$(call install_fixup,codesys,DESCRIPTION,missing)
 
-	@$(call install_copy, codesys, 0, 0, 0644, -, /etc/3S.dat)
+	@$(call install_copy, codesys, 0, 0, 0644, -, /etc/codesyscontrol/3S.dat)
 	@$(call install_tree, codesys, 0, 0, -, /opt/codesys)
 
 	@$(call install_tree, codesys, 0, 0, -, /var/opt/codesys)
 	@$(call install_copy, codesys, 0, 0, 0755, /var/opt/codesys/PlcLogic)
 
-	@$(call install_alternative, codesys, 0, 0, 0644, /etc/CODESYSControl.cfg)
+	@$(call install_alternative, codesys, 0, 0, 0644, /etc/codesyscontrol/CODESYSControl.cfg)
 	@$(call install_alternative, codesys, 0, 0, 0644, /usr/lib/tmpfiles.d/codesys.conf)
 
 	@$(call install_alternative, codesys, 0, 0, 0755, /opt/codesys/bin/log-journal.py)
