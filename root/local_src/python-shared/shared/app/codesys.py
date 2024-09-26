@@ -21,13 +21,13 @@ from ctypes import addressof, sizeof, memmove, c_char, c_uint8, c_uint16, c_uint
 import posix_ipc
 from pathlib import Path
 from functools import partial
-from shared.codesys import parse_struct, runstop_switch
+from shared.codesys_types import AppCfg, AppCmd, AppFbk
 from . import app
 
 
-cfg = parse_struct('AppCfg')()
-cmd = parse_struct('AppCmd')()
-fbk = parse_struct('AppFbk')()
+cfg = AppCfg()
+cmd = AppCmd()
+fbk = AppFbk()
 
 
 _sync_trigger = app.Trigger()
@@ -38,6 +38,11 @@ poll = partial(app.poll, period=_sync_trigger)
 async def sync():
 	await _sync_trigger.wait() #cmd -> codesys
 	await _sync_trigger.wait() #codesys -> fbk
+
+
+
+def runstop_switch(run:bool):
+	Path('/var/opt/codesysextension/runstop.switch').write_bytes(b'RUN' if run else b'STOP')
 
 
 
