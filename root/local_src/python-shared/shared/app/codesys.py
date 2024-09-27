@@ -17,7 +17,7 @@
 
 import asyncio
 import mmap
-from ctypes import addressof, sizeof, memmove, c_char, c_uint8, c_uint16, c_uint32
+from ctypes import addressof, sizeof, memmove, c_byte, c_uint8, c_uint16, c_uint32
 import posix_ipc
 from pathlib import Path
 from functools import partial
@@ -60,8 +60,9 @@ async def exec(period:float):
 			with mmap.mmap(shm.fd, shm.size) as mapfile:
 				cmd_addr, cmd_size = addressof(cmd), sizeof(cmd)
 				fbk_addr, fbk_size = addressof(fbk), sizeof(fbk)
-				shm_cmd_addr = addressof((c_char*shm.size).from_buffer(mapfile))
-				shm_fbk_addr = shm_cmd_addr + cmd_size
+				assert shm.size >= cmd_size + fbk_size
+				shm_cmd_addr = addressof(c_byte.from_buffer(mapfile))
+				shm_fbk_addr = addressof(c_byte.from_buffer(mapfile, cmd_size))
 
 				async def sync_loop():
 					while True:
@@ -99,7 +100,7 @@ class EthercatDevice:
 	async def sdo_write(self, addr:tuple[int, int], data: c_uint8 | c_uint16 | c_uint32):
 		async with self._co_lock:
 			cmd.co.dataLength = sizeof(data)
-			cmd.co.data = c_uint32(data.value)
+			cmd.co.data = data.value
 			await self._sdo_exec(2, addr)
 
 
